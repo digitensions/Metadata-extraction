@@ -110,7 +110,7 @@ def main():
 
     elif "text" in str(metadata_file).lower():
         with open(metadata_file) as file:
-            metadata = readlines(file)
+            metadata = file.readlines()
         m = retrieve_metadata_text(metadata, search, 1)
         if m is None:
             sys.exit(f"No metadata found for {field_requested}. Sorry! Better luck next time.")
