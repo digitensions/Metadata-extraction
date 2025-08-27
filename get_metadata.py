@@ -82,7 +82,7 @@ def main():
     """
     receive file, and metadata type, output data
     """
-    if not length(sys.argv) == 3:
+    if not len(sys.argv) == 3:
         print("Please check you have supplied all required arguments:")
         print("python3 get_metadata.py <metadata> <CID field>")
         sys.exit()
@@ -90,6 +90,8 @@ def main():
     metadata_file = sys.argv[1]
     field_requested = sys.argv[2]
     for data in MDATA_LIST:
+        print(data)
+        print(type(data))
         if data.key() == field_requested:
             search = data.value()[num]
 
