@@ -1,2 +1,2 @@
 # Metadata-extraction
-Respository for metadata extraction workshop
+Respository for metadata extraction workshop. Work in progress.
