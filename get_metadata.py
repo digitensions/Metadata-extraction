@@ -94,7 +94,7 @@ def main():
         print(data)
         print(type(data))
         if field_requested in str(data):
-            search = data.get(field_requested)[num]
+            search = data.get(field_requested)
             break
     if not search:
         sys.exit(f"Could not match CID field to supplied argument: {field_requested}. Better luck next time!")
@@ -123,7 +123,7 @@ def main():
         sys.exit("Could not determine metadata supply type. Please try again with a better source.")
     
 
-def retrieve_metadata_dct(metadata, field, num):
+def retrieve_metadata_dct(metadata, search, num):
     """
     Iterate MDATA_LIST to match supplied
     field name if possible.
@@ -131,13 +131,13 @@ def retrieve_metadata_dct(metadata, field, num):
     media = metadata.get("media")
     for track in media.get("track"):
         for k, v in track.items():
-            if k == search:
+            if k == search[num]:
                 return f"{track.get("@type")} {v}"
 
     return None
 
 
-def retrieve_metadata_text(metadata, field, num):
+def retrieve_metadata_text(metadata, search, num):
     """
     Split string, then read lines to match
     field name where possible.
@@ -146,7 +146,7 @@ def retrieve_metadata_text(metadata, field, num):
     if not len(lines) > 2:
         return None
     for line in lines:
-        if line.startswith(field):
+        if line.startswith(field[num]):
             field_entry = row.split(":", 1)[-1].strip()
             return field_entry
 
