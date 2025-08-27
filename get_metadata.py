@@ -93,8 +93,8 @@ def main():
     for data in MDATA_LIST:
         print(data)
         print(type(data))
-        if data.keys() == field_requested:
-            search = data.value()[num]
+        if field_requested in str(data):
+            search = data.get(field_requested)[num]
             break
     if not search:
         sys.exit(f"Could not match CID field to supplied argument: {field_requested}. Better luck next time!")
