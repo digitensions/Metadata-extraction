@@ -92,7 +92,7 @@ def main():
     for data in MDATA_LIST:
         print(data)
         print(type(data))
-        if data.key() == field_requested:
+        if data.keys() == field_requested:
             search = data.value()[num]
 
     if not os.path.exists(metadata_file):
