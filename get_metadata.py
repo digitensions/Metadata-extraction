@@ -144,7 +144,7 @@ def retrieve_metadata_text(metadata, search, num):
         return None
     for line in metadata:
         if line.startswith(search[num]):
-            field_entry = row.split(":", 1)[-1].strip()
+            field_entry = line.split(":", 1)[-1].strip()
             return field_entry
 
 
