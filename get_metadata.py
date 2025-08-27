@@ -89,12 +89,15 @@ def main():
     
     metadata_file = sys.argv[1]
     field_requested = sys.argv[2]
+    search = None
     for data in MDATA_LIST:
         print(data)
         print(type(data))
         if data.keys() == field_requested:
             search = data.value()[num]
-
+            break
+    if not search:
+        sys.exit(f"Could not match CID field to supplied argument: {field_requested}. Better luck next time!")
     if not os.path.exists(metadata_file):
         sys.exit(f"The path you have supplied cannot be found:\n{metadata_file}")
     
