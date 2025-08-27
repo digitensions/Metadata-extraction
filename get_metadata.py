@@ -140,8 +140,7 @@ def retrieve_metadata_text(metadata, search, num):
     Split string, then read lines to match
     field name where possible.
     """
-    lines = metadata.split("\n")
-    if not len(lines) > 2:
+    if not len(metadata) > 2:
         return None
     for line in lines:
         if line.startswith(field[num]):
