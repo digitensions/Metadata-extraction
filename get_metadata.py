@@ -127,7 +127,7 @@ def retrieve_metadata_dct(metadata, field, num):
     for track in media.get("track"):
         for k, v in track.items():
             if k == search:
-            return f"{track.get("@type")} {v}"
+                return f"{track.get("@type")} {v}"
 
     return None
 
