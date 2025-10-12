@@ -1,3 +1,12 @@
+"""
+Must receive absolute path to folder full of AV files.
+
+A script for reading AV metadata using mediainfo CLI,
+matching to to MDATA_LIST list of dicts and build CSV
+populating metadata of all files in folder and exporting
+to <date_time>_metadata.csv nex tto the supplied folder.
+"""
+
 import json
 import os
 import sys
