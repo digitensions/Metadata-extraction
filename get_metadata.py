@@ -1,151 +1,167 @@
 import json
 import os
 import sys
+import csv
+import subprocess
+from datetime import datetime
+from typing import Dict, Any, List, Final, Optional
 
-MDATA_LIST = [
-    {"container.duration.seconds": ["Duration", "Duration  "]},
-    {"container.file_size.total_bytes": ["FileSize", "File size  "]},
-    {"container.commercial_name": ["Format_Commercial", "Commercial name  "]},
-    {"container.format": ["Format", "Format  "]},
-    {"container.audio_codecs": ["Audio_Codec_List", "Audio codecs "]},
-    {"container.audio_stream_count": ["AudioCount", "Count of audio streams  "]},
-    {"container.video_stream_count": ["VideoCount", "Count of video streams  "]},
-    {"container.format_profile": ["Format_Profile", "Format profile  "]},
-    {"container.format_version": ["Format_Version", "Format version  "]},
-    {"container.encoded_date": ["Encoded_Date", "Encoded date  "]},
-    {"container.frame_count": ["FrameCount", "Frame count  "]},
-    {"container.frame_rate": ["FrameRate", "Frame rate  "]},
-    {"container.overall_bit_rate": ["OverallBitRate_String", "Overall bit rate  "]},
-    {"container.overall_bit_rate_mode": ["OverallBitRate_Mode", "Overall bit rate mode  ",]},
-    {"container.writing_application": ["Encoded_Application", "Writing application  "]},
-    {"container.writing_library": ["Encoded_Library", "Writing library  "]},
-    {"container.file_extension": ["FileExtension", "File extension  "]},
-    {"container.media_UUID": ["UniqueID", "Unique ID  "]},
-    {"container.truncated": ["IsTruncated", "Is truncated  "]},
-    {"video.duration.seconds": ["Duration", "Duration  "]},
-    {"video.bit_depth": ["BitDepth", "Bit depth  "]},
-    {"video.bit_rate_mode": ["BitRate_Mode", "Bit rate mode  "]},
-    {"video.bit_rate": ["BitRate_String", "Bit rate  "]},
-    {"video.chroma_subsampling": ["ChromaSubsampling", "Chroma subsampling"]},
-    {"video.compression_mode": ["Compression_Mode", "Compression mode  "]},
-    {"video.format_version": ["Format_Version", "Format version  "]},
-    {"video.frame_count": ["FrameCount", "Frame count  "]},
-    {"video.frame_rate": ["FrameRate", "Frame rate  "]},
-    {"video.frame_rate_mode": ["FrameRate_Mode", "Frame rate mode  "]},
-    {"video.height": ["Height", "Height  "]},
-    {"video.scan_order": ["ScanOrder_String", "Scan order  "]},
-    {"video.scan_type": ["ScanType", "Scan type  "]},
-    {"video.scan_type.store_method": ["ScanType_StoreMethod_String", "Scan type, store method  "]},
-    {"video.standard": ["Standard", "Standard  "]},
-    {"video.stream_size_bytes": ["StreamSize", "Stream size  "]},
-    {"video.stream_order": ["StreamOrder", "StreamOrder  "]},
-    {"video.width": ["Width", "Width  "]},
-    {"video.format_profile": ["Format_Profile", "Format profile  "]},
-    {"video.width_aperture": ["Width_CleanAperture", "Width clean aperture  "]},
-    {"video.delay": ["Delay", "Delay  "]},
-    {"video.format_settings_GOP": ["Format_Settings_GOP", "Format settings, GOP  "]},
-    {"video.codec_id": ["CodecID", "Codec ID  "]},
-    {"video.colour_space": ["ColorSpace", "Color space  "]},
-    {"video.colour_primaries": ["colour_primaries", "Color primaries  "]},
-    {"video.commercial_name": ["Format_Commercial", "Commercial name  "]},
-    {"video.display_aspect_ratio": ["DisplayAspectRatio", "Display aspect ratio  "]},
-    {"video.format": ["Format", "Format  "]},
-    {"video.matrix_coefficients": ["matrix_coefficients", "Matrix coefficients  "]},
-    {"video.pixel_aspect_ratio": ["PixelAspectRatio", "Pixel aspect ratio  "]},
-    {"video.transfer_characteristics": ["transfer_characteristics", "Transfer characteristics  "]},
-    {"video.writing_library": ["Encoded_Library", "Writing library  "]},
-    {"video.stream_size": ["StreamSize_String", "Stream size  "]},
-    {"colour_range": ["colour_range", "Color range  "]},
-    {"max_slice_count": ["MaxSlicesCount", "MaxSlicesCount  "]},
-    {"audio.bit_depth": ["BitDepth", "Bit depth  "]},
-    {"audio.bit_rate": ["BitRate_String", "Bit rate  "]},
-    {"audio.bit_rate_mode": ["BitRate_Mode", "Bit rate mode  "]},
-    {"audio.channels": ["Channels", "Channel(s)  "]},
-    {"audio.codec_id": ["CodecID", "Codec ID  "]},
-    {"audio.channel_layout": ["ChannelLayout", "Channel layout  "]},
-    {"audio.channel_position": ["ChannelPositions", "Channel positions  "]},
-    {"audio.compression_mode": ["Compression_Mode", "Compression mode  "]},
-    {"audio.format_settings_endianness": ["Format_Settings_Endianness", "Format settings, Endianness  "]},
-    {"audio.format_settings_sign": ["Format_Settings_Sign", "Format settings, Sign  "]},
-    {"audio.frame_count": ["FrameCount", "Frame count  "]},
-    {"audio.language": ["Language_String", "Language  "]},
-    {"audio.stream_size_bytes": ["StreamSize", "Stream size  "]},
-    {"audio.stream_order": ["StreamOrder", "StreamOrder  "]},
-    {"audio.stream_size": ["StreamSize_String", "Stream size  "]},
-    {"audio.commercial_name": ["Format_Commercial", "Commercial name  "]},
-    {"audio.format": ["Format", "Format  "]},
-    {"audio.sampling_rate": ["SamplingRate_String", "Sampling rate  "]},
+# Example key database field names as key
+MDATA_LIST: Final = [
+    {"container_duration": ["Duration", "Duration  "]},
+    {"container_file_size": ["FileSize", "File size  "]},
+    {"container_format": ["Format", "Format  "]},
+    {"container_audio_count": ["AudioCount", "Count of audio streams  "]},
+    {"container_video_count": ["VideoCount", "Count of video streams  "]},
+    {"container_format_profile": ["Format_Profile", "Format profile  "]},
+    {"container_format_version": ["Format_Version", "Format version  "]},
+    {"container_file_extension": ["FileExtension", "File extension  "]},
+    {"video_duration": ["Duration", "Duration  "]},
+    {"video_bit_depth": ["BitDepth", "Bit depth  "]},
+    {"video_bit_rate_mode": ["BitRate_Mode", "Bit rate mode  "]},
+    {"video_bit_rate": ["BitRate_String", "Bit rate  "]},
+    {"video_chroma_subsampling": ["ChromaSubsampling", "Chroma subsampling"]},
+    {"video_compression_mode": ["Compression_Mode", "Compression mode  "]},
+    {"video_format_version": ["Format_Version", "Format version  "]},
+    {"video_format_profile": ["Format_Profile", "Format profile  "]},
+    {"video_format": ["Format", "Format  "]},
+    {"video_frame_count": ["FrameCount", "Frame count  "]},
+    {"video_frame_rate": ["FrameRate", "Frame rate  "]},
+    {"video_height": ["Height", "Height  "]},
+    {"video_width": ["Width", "Width  "]},
+    {"video_scan_order": ["ScanOrder_String", "Scan order  "]},
+    {"video_scan_type": ["ScanType", "Scan type  "]},
+    {"video_codec": ["CodecID", "Codec ID  "]},
+    {"video_dar": ["DisplayAspectRatio", "Display aspect ratio  "]},
+    {"video_par": ["PixelAspectRatio", "Pixel aspect ratio  "]},
+    {"video_colour_space": ["ColorSpace", "Color space  "]},
+    {"video_colour_primaries": ["colour_primaries", "Color primaries  "]},
+    {"video_matrix_coefficients": ["matrix_coefficients", "Matrix coefficients  "]},
+    {"video_transfer_characteristics": ["transfer_characteristics", "Transfer characteristics  "]},
+    {"audio_bit_depth": ["BitDepth", "Bit depth  "]},
+    {"audio_bit_rate": ["BitRate_String", "Bit rate  "]},
+    {"audio_bit_rate_mode": ["BitRate_Mode", "Bit rate mode  "]},
+    {"audio_channels": ["Channels", "Channel(s)  "]},
+    {"audio_codec": ["CodecID", "Codec ID  "]},
+    {"audio_channel_layout": ["ChannelLayout", "Channel layout  "]},
+    {"audio_channel_position": ["ChannelPositions", "Channel positions  "]},
+    {"audio_compression_mode": ["Compression_Mode", "Compression mode  "]},
+    {"audio_frame_count": ["FrameCount", "Frame count  "]},
+    {"audio_stream_size": ["StreamSize_String", "Stream size  "]},
+    {"audio_commercial_name": ["Format_Commercial", "Commercial name  "]},
+    {"audio_format": ["Format", "Format  "]},
+    {"audio_sampling_rate": ["SamplingRate_String", "Sampling rate  "]},
 ]
 
+def get_file_mdata(fpath: str, type: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieve mediainfo metadata
+    with output set to type:
+        JSON
+    """
+    cmd = [
+        "mediainfo",
+        "-f", f"--output={type}",
+        fpath
+    ]
 
-def main():
+    mdata = subprocess.run(cmd, shell=False, capture_output=True)
+    return json.loads(mdata.stdout) if mdata.returncode == 0 else None
+
+
+def main() -> None:
     """
-    receive file, and metadata type, output data
+    receive folderpath, iterate through all file contents
+    write to csv and output metadata.csv alongside folder
     """
-    if not len(sys.argv) == 3:
+    if len(sys.argv) != 2:
         print("Please check you have supplied all required arguments:")
-        print("python3 get_metadata.py <metadata> <CID field>")
+        print("python3 metadata_to_csv.py <path_to_folder>")
         sys.exit()
-    
-    metadata_file = sys.argv[1]
-    field_requested = sys.argv[2]
-    search = None
-    for data in MDATA_LIST:
-        if field_requested in str(data):
-            search = data.get(field_requested)
-            break
-    if not search:
-        sys.exit(f"Could not match CID field to supplied argument: {field_requested}. Better luck next time!")
-    if not os.path.exists(metadata_file):
-        sys.exit(f"The path you have supplied cannot be found:\n{metadata_file}")
-    
-    if "json" in str(metadata_file).lower():
-        with open(metadata_file) as file:
-            metadata = json.load(file)
-        m = retrieve_metadata_dct(metadata, search, 0)
-        if m is None:
-            sys.exit(f"No metadata found for {field_requested}. Sorry! Better luck next time.")
-        print(f"Found metadata for {field_requested}: {m}")
-        sys.exit(f"Please run the script again for more metadata... Good bye!")
 
-    elif "text" in str(metadata_file).lower():
-        with open(metadata_file) as file:
-            metadata = file.readlines()
-        m = retrieve_metadata_text(metadata, search, 1)
-        if m is None:
-            sys.exit(f"No metadata found for {field_requested}. Sorry! Better luck next time.")
-        print(f"Found metadata for {field_requested}: {m}")
-        sys.exit(f"Please run the script again for more metadata... Good bye!")
+    folderpath = sys.argv[1].strip()
+    # Create new metadata.csv alongside folder path
+    date_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    csv_path = os.path.join(os.path.split(folderpath)[0], f"{date_string}_metadata.csv")
+    if not os.path.exists(folderpath):
+        sys.exit(f"Please check your path is valid: {folderpath}")
 
-    else:
-        sys.exit("Could not determine metadata supply type. Please try again with a better source.")
-    
+    # Build file list, then iterate files making JSON metadata
+    files = [x for x in os.listdir(folderpath) if os.path.isfile(os.path.join(folderpath, x))]
+    for file in files:
+        fpath = os.path.join(folderpath, file)
+        # Skip if file name starts with "."
+        if file.startswith("."):
+            continue
+        # Get JSON formatted metadata
+        file_metadata = get_file_mdata(fpath, 'JSON')
+        
+        # Build a list from the MDATA_LIST
+        mdata_list = iterate_data_match(file_metadata)
+        
+        # Write each file metadata to CSV
+        write_to_csv(csv_path, file, mdata_list)
 
-def retrieve_metadata_dct(metadata, search, num):
+
+def iterate_data_match(file_mdata: Dict[str, Any]) -> List[Any]:
+    """
+    Work through list extracting
+    matching metadata
+    """
+    match_stream: Final = {
+        "container": "General",
+        "video": "Video",
+        "audio": "Audio"
+    }
+    mdata_list = []
+    for entry in MDATA_LIST:
+        for k, v in entry.items():
+            stream_type = k.split("_", 1)[0]
+            stream = match_stream[stream_type]
+            field = v[0]
+            mdata = retrieve_metadata_dct(file_mdata, stream, field)
+            mdata_list.append(mdata)
+
+    return mdata_list
+
+
+def retrieve_metadata_dct(metadata: dict, stream: str, field: str) -> str:
     """
     Iterate MDATA_LIST to match supplied
-    field name if possible.
+    field name, else return empty string.
     """
     media = metadata.get("media")
-    for track in media.get("track"):
-        for k, v in track.items():
-            if k == search[num]:
-                return f"{track.get("@type")} {v}"
 
-    return None
+    return next(
+        (
+            track.get(field)
+            for track in media.get("track")
+            if track.get("@type") == stream
+        ),
+        "",
+    )
 
 
-def retrieve_metadata_text(metadata, search, num):
+def write_to_csv(csv_path: str, filename: str, metadata: list) -> None:
     """
-    Split string, then read lines to match
-    field name where possible.
+    Take list and write into CSV
+    Create CSV first if not existing
+    and create header row
     """
-    if not len(metadata) > 2:
-        return None
-    for line in metadata:
-        if line.startswith(search[num]):
-            field_entry = line.split(":", 1)[-1].strip()
-            return field_entry
+    metadata = [filename] + metadata
+
+    if not os.path.isfile(csv_path):
+        KEY_LIST = ["file_name"]
+        with open(csv_path, "a+") as csvfile:
+            for entry in MDATA_LIST:
+                KEY_LIST.extend((iter(entry)))
+            dataw = csv.writer(csvfile)
+            dataw.writerow(KEY_LIST)
+
+    with open(csv_path, "a") as csvfile:
+        datawriter = csv.writer(csvfile)
+        print(f"Adding to CSV :\n{metadata}")
+        datawriter.writerow(metadata)
 
 
 if __name__ == "__main__":
