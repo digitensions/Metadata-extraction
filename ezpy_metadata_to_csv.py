@@ -127,7 +127,7 @@ def write_to_csv(csv_path: str, filename: str, metadata: list) -> None:
 
 
 # The code that iterates and opens the files, matches metadata and writes it to CSV
-print(os.listdir("."))
+print(os.listdir())
 for root, _, files in os.walk("."):
     for file in files:
         if file.endswith((".py", ".csv")):
