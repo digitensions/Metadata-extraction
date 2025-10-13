@@ -127,6 +127,7 @@ def write_to_csv(csv_path: str, filename: str, metadata: list) -> None:
 
 
 # The code that iterates and opens the files, matches metadata and writes it to CSV
+print(os.listdir("."))
 for root, _, files in os.walk("."):
     for file in files:
         if file.endswith((".py", ".csv")):
@@ -135,7 +136,7 @@ for root, _, files in os.walk("."):
         mdata = get_file_mdata(fpath, "JSON")
         mdata_list = iterate_data_match(mdata)
         write_to_csv("metadata.csv", file, mdata_list)
-        print(os.listdir("."))
+
 
 with open("metadata.csv", "r") as file:
     csv_data = file.read()
