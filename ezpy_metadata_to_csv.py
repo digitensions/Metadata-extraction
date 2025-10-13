@@ -63,7 +63,24 @@ def get_file_mdata(fpath: str, type: str) -> Optional[Dict[str, Any]]:
         data = file.read()
 
     return json.loads(data)
-  
+
+
+def retrieve_metadata_dct(metadata: dict, stream: str, field: str) -> str:
+    """
+    Iterate MDATA_LIST to match supplied
+    field name, else return empty string.
+    """
+    media = metadata.get("media")
+
+    return next(
+        (
+            track.get(field)
+            for track in media.get("track")
+            if track.get("@type") == stream
+        ),
+        "",
+    )
+
 
 def iterate_data_match(file_mdata: Dict[str, Any]) -> List[Any]:
     """
@@ -85,23 +102,6 @@ def iterate_data_match(file_mdata: Dict[str, Any]) -> List[Any]:
             mdata_list.append(mdata)
 
     return mdata_list
-
-
-def retrieve_metadata_dct(metadata: dict, stream: str, field: str) -> str:
-    """
-    Iterate MDATA_LIST to match supplied
-    field name, else return empty string.
-    """
-    media = metadata.get("media")
-
-    return next(
-        (
-            track.get(field)
-            for track in media.get("track")
-            if track.get("@type") == stream
-        ),
-        "",
-    )
 
 
 def write_to_csv(csv_path: str, filename: str, metadata: list) -> None:
