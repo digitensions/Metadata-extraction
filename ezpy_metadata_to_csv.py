@@ -138,5 +138,6 @@ for root, _, files in os.walk("."):
         print(os.listdir("."))
 
 with open("metadata.csv", "r") as file:
-    csv_data = read.file()
+    csv_data = file.read()
+    print("CSV contents:")
     print(csv_data)
