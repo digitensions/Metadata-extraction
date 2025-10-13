@@ -67,7 +67,7 @@ def get_file_mdata(fpath: str, type: str) -> Optional[Dict[str, Any]]:
 
 def retrieve_metadata_dct(metadata: dict, stream: str, field: str) -> str:
     """
-    Iterate MDATA_LIST to match supplied
+    Iterate received JSON metadata to match supplied
     field name, else return empty string.
     """
     media = metadata.get("media")
