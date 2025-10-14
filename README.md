@@ -1,3 +1,3 @@
 # Metadata-extraction
-Respository for metadata extraction workshop. Paired to blog post to be found here:
+Respository for metadata extraction workshop. Paired with blog training post to be found here:
 https://digitensions.home.blog/
